@@ -8,6 +8,9 @@ edition = "2021"
 [dependencies]
 bevy_rapier3d = "0.16.0"
 bevy_editor_pls={git = "https://github.com/MitchellMarinoDev/bevy_editor_pls.git"}
+bevy_flycam = { git = "https://github.com/sburris0/bevy_flycam" }
+rand = "0.8.5"
+
 
 [dependencies.bevy]
 version="0.8.0"

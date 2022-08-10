@@ -18,6 +18,9 @@ pub struct CubeTexture {
     pub right: Handle<StandardMaterial>,
 }
 
+// 这要某种加载到的方法？
+
+// fixme 这里的碰撞体的绑定可以 后面做个句柄传进来
 pub fn render_cube(
     commands: &mut Commands,
     quad_handle: Handle<Mesh>,
@@ -25,6 +28,7 @@ pub fn render_cube(
     vec3: Vec3,
     cube_size: f32,
 ) {
+    // 有一个办法来判断 这个面是不是要显示吗？？？
     commands.spawn_bundle(PbrBundle {
         mesh: quad_handle.clone(),
         material: texture.forward.clone(),

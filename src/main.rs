@@ -2,14 +2,20 @@ use bevy::prelude::*;
 use bevy_editor_pls::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use bevy_flycam::PlayerPlugin;
 use mycraft::cube::prelude::*;
+use mycraft::world::prelude::*;
 
 fn main() {
     App::new()
         .insert_resource(Msaa { samples: 4 })
+        .init_resource::<BigMap>()
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
+        // 这里有什么办法可以获取到 当前的地址吗？
+        // 这里 有可能要hack?
+        .add_plugin(PlayerPlugin)
         // .add_plugin(EditorPlugin)
         .add_startup_system(setup)
         .run();
@@ -26,6 +32,8 @@ fn setup(
 ) {
     // 尝试展示 一个面
     // 加载资源
+
+    // 加载地图资源 然后在更新系统中 渲染具体的数据
 
     const cuble_size: f32 = 1.0;
 
@@ -89,9 +97,11 @@ fn setup(
 
     // 生成一个第一视角
 
+    // 这里测试 暂时使用 一个包里的漫游相机
+
     // camera
-    commands.spawn_bundle(Camera3dBundle {
-        transform: Transform::from_xyz(3.0, 7.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+    // commands.spawn_bundle(Camera3dBundle {
+    //     transform: Transform::from_xyz(3.0, 7.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
+    //     ..default()
+    // });
 }

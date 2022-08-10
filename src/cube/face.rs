@@ -55,7 +55,7 @@ pub fn get_transform_by_face_type(
             ..default()
         },
         FaceType::Down => Transform {
-            translation: Vec3::new(tans.x, tans.y, tans.y + cube_size / 2.0),
+            translation: Vec3::new(tans.x, tans.y - cube_size / 2.0, tans.z),
             rotation: Quat::from_rotation_x(PI / 2.0),
             ..default()
         },
