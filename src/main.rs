@@ -10,6 +10,7 @@ use mycraft::cube::prelude::*;
 fn main() {
     App::new()
         // 这个资源只是mapData的缓存
+        .insert_resource(TestGetter::gen())
         .insert_resource(MapData {
             data: HashMap::new(),
         })
@@ -37,7 +38,7 @@ fn dynamic_render_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands,
-    query: Query<(Entity, &Transform), Added<Cube>>,
+    query: Query<(Entity, &Transform, &CubeData), Added<CubeData>>,
 ) {
     const CUBLE_SIZE: f32 = 1.0;
     let texture_handle: Handle<Image> = asset_server.load("a.jpeg");
@@ -54,23 +55,18 @@ fn dynamic_render_system(
     });
 
     // 查询新增的 组件
-    for (ele, transform) in query.iter() {
+    for (ele, transform, cube_data) in query.iter() {
         // 这里 是测试代码 如果组件的 y 小于等于0就进行渲染
+        // todo 这里优化面的加载
+        if cube_data.cube_id != BasicCubeId::EmptyId as i32 {
+            // 不是空 才进行处理
+            todo!();
+        }
         // info!("checked");
         if transform.translation.y == 0.0 {
             commands
                 .entity(ele)
-                // .insert_bundle(PbrBundle {
-                //     mesh: quad_handle.clone(),
-                //     material: material_handle.clone(),
-                //     transform: get_transform_by_face_type(
-                //         FaceType::Up,
-                //         transform.clone(),
-                //         // Transform::from_xyz(0.0, 0.0, 0.0),
-                //         CUBLE_SIZE,
-                //     ),
-                //     ..Default::default()
-                // });
+                // 这里 要 根据别的情况来进行查询！
                 .add_children(|childern| {
                     childern.spawn_bundle(PbrBundle {
                         mesh: quad_handle.clone(),
@@ -94,7 +90,9 @@ fn dynamic_load_system(
     mut mapdata: ResMut<MapData>,
     mut commands: Commands,
     mut query: Query<&mut Transform, With<FlyCam>>,
+    mut test_getter: ResMut<TestGetter>,
 ) {
+    let test_map = test_getter.as_mut();
     // 查询到主相机的 变化
     for transform in query.iter() {
         // 这里 要判断 加载到系统的值吗？
@@ -173,21 +171,31 @@ fn dynamic_load_system(
                             None => {
                                 // todo 这里要判断一下 是否可以取到？ 这里要判断一下这里的 block 是否要进入到这里面
                                 // 如果不存在的情况下 创建这个 对象
-                                entity = commands
-                                    .spawn_bundle(SpatialBundle {
-                                        visibility: Visibility { is_visible: true },
-                                        transform: Transform::from_xyz(
-                                            x as f32, y as f32, z as f32,
-                                        ),
-                                        ..Default::default()
-                                    })
-                                    .insert(Cube)
-                                    .id();
+                                match test_map.find(check_point) {
+                                    Some(cube_data) => {
+                                        // info!("正在加载{:?}", check_point);
+                                        entity = commands
+                                            .spawn_bundle(SpatialBundle {
+                                                visibility: Visibility { is_visible: true },
+                                                transform: Transform::from_xyz(
+                                                    x as f32, y as f32, z as f32,
+                                                ),
+                                                ..Default::default()
+                                            })
+                                            .insert(Cube)
+                                            .insert(cube_data.clone())
+                                            .id();
+                                        data.insert(check_point, entity);
+                                    }
+                                    None => {
+                                        info!("{:?} 没有找到cube数据", check_point)
+                                    }
+                                }
                                 // 把这个新的 缓存进去
-                                data.insert(check_point, entity);
+
                                 // 这里 应该根据 某种方法来判断 里面的值? 通过一个点 来加载里面的信息
                                 // todo load_cube_by_point3d 方法查询 这个点 应该算出来的结果~~
-                                // info!("正在加载{:?}", check_point);
+
                                 // 然后添加一个偏移量
                             }
                         }

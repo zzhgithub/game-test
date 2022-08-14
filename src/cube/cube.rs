@@ -34,6 +34,7 @@ impl Point3D {
  */
 pub const BASIC_ID: ModId = ModId(00);
 
+#[derive(Clone, Copy)]
 pub struct ModId(i32);
 
 impl Default for ModId {
@@ -42,6 +43,7 @@ impl Default for ModId {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum FaceTo {
     // 面向
     Z,
@@ -59,15 +61,15 @@ impl Default for FaceTo {
     }
 }
 
-#[derive(Default, Component)]
+#[derive(Default, Component, Clone, Copy)]
 pub struct CubeData {
-    mod_id: ModId,
+    pub mod_id: ModId,
     // 方块的 资源是什么
-    cube_id: i32,
+    pub cube_id: i32,
     // 方块
-    face_to: FaceTo,
+    pub face_to: FaceTo,
     // 剩余的耐久
-    retain: f32,
+    pub retain: f32,
 }
 
 //！！ 这里 已经暗示了 通过 CubeData的数据来更新 方块中的数据
@@ -80,10 +82,10 @@ pub trait MapGetter {
     /**
      * 通过一个点 查询 方块的信息
      */
-    fn find(p: Point3D) -> Option<CubeData>;
+    fn find(&self, p: Point3D) -> Option<&CubeData>;
 
     /**
      * 查询一组点 数据
      */
-    fn find_list(p_list: Vec<Point3D>) -> HashMap<Point3D, CubeData>;
+    fn find_list(&self, p_list: Vec<Point3D>) -> HashMap<Point3D, CubeData>;
 }
