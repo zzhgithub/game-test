@@ -56,28 +56,31 @@ fn dynamic_render_system(
         // 这里 是测试代码 如果组件的 y 小于等于0就进行渲染
         // info!("checked");
         if transform.translation.y == 0.0 {
-            commands.entity(ele).insert_bundle(PbrBundle {
-                mesh: quad_handle.clone(),
-                material: material_handle.clone(),
-                transform: get_transform_by_face_type(
-                    FaceType::Up,
-                    transform.clone(),
-                    // Transform::from_xyz(0.0, 0.0, 0.0),
-                    CUBLE_SIZE,
-                ),
-                ..Default::default()
-            });
-            // .add_children(|childern| {
-            //     childern.spawn_bundle(PbrBundle {
-            //         mesh: quad_handle.clone(),
-            //         material: material_handle.clone(),
-            //         transform: get_transform_by_face_type(
-            //             FaceType::Up,
-            //             Transform::from_xyz(0.0, 0.0, 0.0),
-            //             CUBLE_SIZE,
-            //         ),
-            //         ..Default::default()
-            //     });
+            commands
+                .entity(ele)
+                // .insert_bundle(PbrBundle {
+                //     mesh: quad_handle.clone(),
+                //     material: material_handle.clone(),
+                //     transform: get_transform_by_face_type(
+                //         FaceType::Up,
+                //         transform.clone(),
+                //         // Transform::from_xyz(0.0, 0.0, 0.0),
+                //         CUBLE_SIZE,
+                //     ),
+                //     ..Default::default()
+                // });
+                .add_children(|childern| {
+                    childern.spawn_bundle(PbrBundle {
+                        mesh: quad_handle.clone(),
+                        material: material_handle.clone(),
+                        transform: get_transform_by_face_type(
+                            FaceType::Up,
+                            Transform::from_xyz(0.0, 0.0, 0.0),
+                            CUBLE_SIZE,
+                        ),
+                        ..Default::default()
+                    });
+                });
         }
     }
 }
@@ -101,7 +104,7 @@ fn dynamic_load_system(
         let may_z = at.z.round();
         // 数据每一帧都在加载 是不行的
         // 必选它走到边缘的时候才加载！！！
-        let load_size: f32 = 5.0;
+        let load_size: f32 = 15.0;
         let check_size: f32 = 5.0;
         // todo 八个方向 中 如果发现 5格子内没有了才进行加载
         // fixme 先处理 要不加载的数据 可以先进行清除? 全部清除掉 其中有的 CloseTo 组件？
@@ -134,7 +137,7 @@ fn dynamic_load_system(
             || !data.contains_key(&Point3D::new(
                 may_x as i32,
                 may_y as i32,
-                (may_z + check_size) as i32,
+                (may_z - check_size) as i32,
             ))
         {
             info!("clean");
@@ -146,7 +149,7 @@ fn dynamic_load_system(
                     + (may_z - point3d.z as f32).powi(2);
                 if sum.sqrt() > ((15.0 as f32).powi(2) * 2.0 as f32).sqrt() {
                     to_remove.push(point3d.to_owned());
-                    commands.entity(entity.to_owned()).despawn();
+                    commands.entity(entity.to_owned()).despawn_recursive();
                 }
             }
             for key in to_remove.iter() {
@@ -166,11 +169,16 @@ fn dynamic_load_system(
                                 // info!("已经加载了{:?}", check_point);
                             }
                             None => {
-                                // 这里要判断一下这里的 block 是否要进入到这里面
+                                // todo 这里要判断一下 是否可以取到？ 这里要判断一下这里的 block 是否要进入到这里面
                                 // 如果不存在的情况下 创建这个 对象
                                 entity = commands
-                                    .spawn()
-                                    .insert(Transform::from_xyz(x as f32, y as f32, z as f32))
+                                    .spawn_bundle(SpatialBundle {
+                                        visibility: Visibility { is_visible: true },
+                                        transform: Transform::from_xyz(
+                                            x as f32, y as f32, z as f32,
+                                        ),
+                                        ..Default::default()
+                                    })
                                     .insert(Cube)
                                     .id();
                                 // 把这个新的 缓存进去
@@ -181,7 +189,6 @@ fn dynamic_load_system(
                                 // 然后添加一个偏移量
                             }
                         }
-                        // 然后在对这个对象 进行处理
                     }
                 }
             }
