@@ -9,6 +9,7 @@ use mycraft::cube::prelude::*;
 
 fn main() {
     App::new()
+        // 这个资源只是mapData的缓存
         .insert_resource(MapData {
             data: HashMap::new(),
         })
@@ -29,6 +30,7 @@ fn main() {
  * todo 动态绘制系统
  * 当 cube added的时候 和 cube 的状态改变时 才重新 绘制！
  * 注意这是一段测试代码
+ * 当单个的 数据发生了变化的时候 也要更新！！！
  */
 fn dynamic_render_system(
     asset_server: Res<AssetServer>,
