@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+
 
 use bevy::prelude::*;
 use bevy_editor_pls::prelude::*;
@@ -16,6 +18,8 @@ fn main() {
         })
         .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
+        .add_plugin(LogDiagnosticsPlugin::default())
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
         // todo 这里要自己去实现 这个可以移动的相机
@@ -41,7 +45,7 @@ fn dynamic_render_system(
     query: Query<(Entity, &Transform, &CubeData), Added<CubeData>>,
 ) {
     const CUBLE_SIZE: f32 = 1.0;
-    let texture_handle: Handle<Image> = asset_server.load("a.jpeg");
+    let texture_handle: Handle<Image> = asset_server.load("pixil-frame-0.png");
     // 声明一个 2D 的贴图
     let quad_handle = meshes.add(Mesh::from(shape::Quad::new(Vec2::new(
         CUBLE_SIZE, CUBLE_SIZE,
@@ -60,7 +64,7 @@ fn dynamic_render_system(
         // todo 这里优化面的加载
         if cube_data.cube_id != BasicCubeId::EmptyId as i32 {
             // 不是空 才进行处理
-            todo!();
+            // todo!();
         }
         // info!("checked");
         if transform.translation.y == 0.0 {
