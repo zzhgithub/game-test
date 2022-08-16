@@ -60,8 +60,15 @@ impl TestGetter {
 }
 
 impl MapGetter for TestGetter {
-    fn find(&self, p: Point3D) -> Option<&CubeData> {
-        self.data.get(&p)
+    fn find(&self, p: Point3D) -> Option<CubeData> {
+        let tmp = CubeData {
+            mod_id: BASIC_ID,
+            cube_id: BasicCubeId::EmptyId as i32,
+            ..Default::default()};
+        match self.data.get(&p) {
+            Some(rs)=>Some(rs.clone()),
+            None=>Some(tmp),            
+        }
     }
 
     fn find_list(&self, p_list: Vec<Point3D>) -> std::collections::HashMap<Point3D, CubeData> {

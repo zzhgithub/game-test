@@ -82,7 +82,7 @@ pub trait MapGetter {
     /**
      * 通过一个点 查询 方块的信息
      */
-    fn find(&self, p: Point3D) -> Option<&CubeData>;
+    fn find(&self, p: Point3D) -> Option<CubeData>;
 
     /**
      * 查询一组点 数据
