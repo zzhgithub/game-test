@@ -46,7 +46,7 @@ impl TestGetter {
                         res.data.insert(p, grass.clone());
                     } else if y >= -8 && y < -1 {
                         res.data.insert(p, soil.clone());
-                    } else if y >= -100 && y < 8 {
+                    } else if y >= -100 && y < -8 {
                         res.data.insert(p, stone.clone());
                     } else {
                         res.data.insert(p, vess.clone());
@@ -64,10 +64,11 @@ impl MapGetter for TestGetter {
         let tmp = CubeData {
             mod_id: BASIC_ID,
             cube_id: BasicCubeId::EmptyId as i32,
-            ..Default::default()};
+            ..Default::default()
+        };
         match self.data.get(&p) {
-            Some(rs)=>Some(rs.clone()),
-            None=>Some(tmp),            
+            Some(rs) => Some(rs.clone()),
+            None => Some(tmp),
         }
     }
 
