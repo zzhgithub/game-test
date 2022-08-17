@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use super::prelude::{FaceType, BasicCubeId};
+use super::prelude::{BasicCubeId, FaceType};
 
 /**
  * 方块
@@ -36,7 +36,7 @@ impl Point3D {
  */
 pub const BASIC_ID: ModId = ModId(00);
 
-#[derive(Clone, Copy,PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModId(i32);
 
 impl Default for ModId {
@@ -95,21 +95,21 @@ pub trait MapGetter {
 /**
  * 判断一个面是否要被加载
  */
-pub fn need_to_render<T:MapGetter>(map_getter:&T,
-    point3d:Point3D,
-    face_type:FaceType)->bool{
-        let check_point:Point3D;
-        match face_type {
-            FaceType::Up=>check_point = Point3D::new(point3d.x, point3d.y+1, point3d.z),
-            FaceType::Down=>check_point = Point3D::new(point3d.x, point3d.y-1, point3d.z),
-            FaceType::Forward=>check_point = Point3D::new(point3d.x, point3d.y, point3d.z+1),
-            FaceType::Backward=>check_point = Point3D::new(point3d.x, point3d.y, point3d.z-1),
-            FaceType::Left=>check_point = Point3D::new(point3d.x-1, point3d.y, point3d.z),
-            FaceType::Right=>check_point = Point3D::new(point3d.x+1, point3d.y, point3d.z),
-        };
-        // 在这个面 的周边只有没有数据 或者 有数据为空的情况下 才不加载
-        match map_getter.find(check_point) {
-            Some(cube_data)=> cube_data.cube_id == (BasicCubeId::EmptyId as i32) && cube_data.mod_id.eq(&BASIC_ID) ,
-            None=>true
+pub fn need_to_render<T: MapGetter>(map_getter: &T, point3d: Point3D, face_type: FaceType) -> bool {
+    let check_point: Point3D;
+    match face_type {
+        FaceType::Up => check_point = Point3D::new(point3d.x, point3d.y + 1, point3d.z),
+        FaceType::Down => check_point = Point3D::new(point3d.x, point3d.y - 1, point3d.z),
+        FaceType::Forward => check_point = Point3D::new(point3d.x, point3d.y, point3d.z + 1),
+        FaceType::Backward => check_point = Point3D::new(point3d.x, point3d.y, point3d.z - 1),
+        FaceType::Left => check_point = Point3D::new(point3d.x - 1, point3d.y, point3d.z),
+        FaceType::Right => check_point = Point3D::new(point3d.x + 1, point3d.y, point3d.z),
+    };
+    // 在这个面 的周边只有没有数据 或者 有数据为空的情况下 才不加载
+    match map_getter.find(check_point) {
+        Some(cube_data) => {
+            cube_data.cube_id == (BasicCubeId::EmptyId as i32) && cube_data.mod_id.eq(&BASIC_ID)
         }
+        None => true,
+    }
 }

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use std::f32::consts::PI;
+use std::{f32::consts::PI, fmt::Display};
 
 /**
  * 朝向面类型
@@ -69,5 +69,19 @@ pub fn get_transform_by_face_type(
             rotation: Quat::from_rotation_y(PI / 2.0),
             ..default()
         },
+    }
+}
+impl FaceType {
+    pub const ALL: [&'static str; 6] = ["u", "d", "f", "b", "l", "r"];
+
+    pub fn to_string(&self) -> &str {
+        match self {
+            &FaceType::Up => "u",
+            &FaceType::Down => "d",
+            &FaceType::Forward => "f",
+            &FaceType::Backward => "b",
+            &FaceType::Left => "l",
+            &FaceType::Right => "r",
+        }
     }
 }
