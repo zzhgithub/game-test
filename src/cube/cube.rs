@@ -92,14 +92,6 @@ pub trait MapGetter {
     fn find_list(&self, p_list: Vec<Point3D>) -> HashMap<Point3D, CubeData>;
 }
 
-
-// 通过cubedata 加载一下 资源
-pub fn load_textrue_by_cube_data(cube_data:CubeData, face_type:FaceType){
-    // todo!
-    // 通过 cube_id 和 面 还有朝向 来获取！
-}
-
-
 /**
  * 判断一个面是否要被加载
  */
