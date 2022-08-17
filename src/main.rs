@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+
 
 use bevy::prelude::*;
 use bevy_editor_pls::prelude::*;
@@ -9,11 +11,15 @@ use mycraft::cube::prelude::*;
 
 fn main() {
     App::new()
+        // 这个资源只是mapData的缓存
+        .insert_resource(TestGetter::gen())
         .insert_resource(MapData {
             data: HashMap::new(),
         })
         .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
+        .add_plugin(LogDiagnosticsPlugin::default())
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
         // todo 这里要自己去实现 这个可以移动的相机
@@ -29,16 +35,21 @@ fn main() {
  * todo 动态绘制系统
  * 当 cube added的时候 和 cube 的状态改变时 才重新 绘制！
  * 注意这是一段测试代码
+ * 当单个的 数据发生了变化的时候 也要更新！！！
  */
 fn dynamic_render_system(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands,
-    query: Query<(Entity, &Transform), Added<Cube>>,
+    mut test_getter: ResMut<TestGetter>,
+    query: Query<(Entity, &Transform, &CubeData), Added<CubeData>>,
 ) {
+    
+    let test_map = test_getter.as_mut();
+
     const CUBLE_SIZE: f32 = 1.0;
-    let texture_handle: Handle<Image> = asset_server.load("a.jpeg");
+    let texture_handle: Handle<Image> = asset_server.load("pixil-frame-0.png");
     // 声明一个 2D 的贴图
     let quad_handle = meshes.add(Mesh::from(shape::Quad::new(Vec2::new(
         CUBLE_SIZE, CUBLE_SIZE,
@@ -52,34 +63,90 @@ fn dynamic_render_system(
     });
 
     // 查询新增的 组件
-    for (ele, transform) in query.iter() {
+    for (ele, transform, cube_data) in query.iter() {
         // 这里 是测试代码 如果组件的 y 小于等于0就进行渲染
-        // info!("checked");
-        if transform.translation.y == 0.0 {
+        // todo 这里优化面的加载
+        if cube_data.cube_id != BasicCubeId::EmptyId as i32 {
+            // 不是空 才进行处理
+            let check_point = Point3D::new(transform.translation.x as i32,
+                transform.translation.y as i32,
+                transform.translation.z as i32);
             commands
                 .entity(ele)
-                // .insert_bundle(PbrBundle {
-                //     mesh: quad_handle.clone(),
-                //     material: material_handle.clone(),
-                //     transform: get_transform_by_face_type(
-                //         FaceType::Up,
-                //         transform.clone(),
-                //         // Transform::from_xyz(0.0, 0.0, 0.0),
-                //         CUBLE_SIZE,
-                //     ),
-                //     ..Default::default()
-                // });
                 .add_children(|childern| {
-                    childern.spawn_bundle(PbrBundle {
-                        mesh: quad_handle.clone(),
-                        material: material_handle.clone(),
-                        transform: get_transform_by_face_type(
-                            FaceType::Up,
-                            Transform::from_xyz(0.0, 0.0, 0.0),
-                            CUBLE_SIZE,
-                        ),
-                        ..Default::default()
-                    });
+                    // info!("判断一个是否加载{}",need_to_render(test_map,check_point,FaceType::Up));
+                    if need_to_render(test_map,check_point,FaceType::Up) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Up,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Down) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Down,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Forward) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Forward,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Backward) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Backward,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Right) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Right,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Left) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Left,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
                 });
         }
     }
@@ -92,7 +159,9 @@ fn dynamic_load_system(
     mut mapdata: ResMut<MapData>,
     mut commands: Commands,
     mut query: Query<&mut Transform, With<FlyCam>>,
+    mut test_getter: ResMut<TestGetter>,
 ) {
+    let test_map = test_getter.as_mut();
     // 查询到主相机的 变化
     for transform in query.iter() {
         // 这里 要判断 加载到系统的值吗？
@@ -171,21 +240,31 @@ fn dynamic_load_system(
                             None => {
                                 // todo 这里要判断一下 是否可以取到？ 这里要判断一下这里的 block 是否要进入到这里面
                                 // 如果不存在的情况下 创建这个 对象
-                                entity = commands
-                                    .spawn_bundle(SpatialBundle {
-                                        visibility: Visibility { is_visible: true },
-                                        transform: Transform::from_xyz(
-                                            x as f32, y as f32, z as f32,
-                                        ),
-                                        ..Default::default()
-                                    })
-                                    .insert(Cube)
-                                    .id();
+                                match test_map.find(check_point) {
+                                    Some(cube_data) => {
+                                        // info!("正在加载{:?}", check_point);
+                                        entity = commands
+                                            .spawn_bundle(SpatialBundle {
+                                                visibility: Visibility { is_visible: true },
+                                                transform: Transform::from_xyz(
+                                                    x as f32, y as f32, z as f32,
+                                                ),
+                                                ..Default::default()
+                                            })
+                                            .insert(Cube)
+                                            .insert(cube_data.clone())
+                                            .id();
+                                        data.insert(check_point, entity);
+                                    }
+                                    None => {
+                                        info!("{:?} 没有找到cube数据", check_point)
+                                    }
+                                }
                                 // 把这个新的 缓存进去
-                                data.insert(check_point, entity);
+
                                 // 这里 应该根据 某种方法来判断 里面的值? 通过一个点 来加载里面的信息
                                 // todo load_cube_by_point3d 方法查询 这个点 应该算出来的结果~~
-                                // info!("正在加载{:?}", check_point);
+
                                 // 然后添加一个偏移量
                             }
                         }
