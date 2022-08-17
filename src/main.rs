@@ -42,8 +42,12 @@ fn dynamic_render_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands,
+    mut test_getter: ResMut<TestGetter>,
     query: Query<(Entity, &Transform, &CubeData), Added<CubeData>>,
 ) {
+    
+    let test_map = test_getter.as_mut();
+
     const CUBLE_SIZE: f32 = 1.0;
     let texture_handle: Handle<Image> = asset_server.load("pixil-frame-0.png");
     // 声明一个 2D 的贴图
@@ -64,24 +68,85 @@ fn dynamic_render_system(
         // todo 这里优化面的加载
         if cube_data.cube_id != BasicCubeId::EmptyId as i32 {
             // 不是空 才进行处理
-            // todo!();
-        }
-        // info!("checked");
-        if transform.translation.y == 0.0 {
+            let check_point = Point3D::new(transform.translation.x as i32,
+                transform.translation.y as i32,
+                transform.translation.z as i32);
             commands
                 .entity(ele)
-                // 这里 要 根据别的情况来进行查询！
                 .add_children(|childern| {
-                    childern.spawn_bundle(PbrBundle {
-                        mesh: quad_handle.clone(),
-                        material: material_handle.clone(),
-                        transform: get_transform_by_face_type(
-                            FaceType::Up,
-                            Transform::from_xyz(0.0, 0.0, 0.0),
-                            CUBLE_SIZE,
-                        ),
-                        ..Default::default()
-                    });
+                    // info!("判断一个是否加载{}",need_to_render(test_map,check_point,FaceType::Up));
+                    if need_to_render(test_map,check_point,FaceType::Up) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Up,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Down) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Down,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Forward) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Forward,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Backward) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Backward,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Right) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Right,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    if need_to_render(test_map,check_point,FaceType::Left) {
+                        childern.spawn_bundle(PbrBundle {
+                            mesh: quad_handle.clone(),
+                            material: material_handle.clone(),
+                            transform: get_transform_by_face_type(
+                                FaceType::Left,
+                                Transform::from_xyz(0.0, 0.0, 0.0),
+                                CUBLE_SIZE,
+                            ),
+                            ..Default::default()
+                        });
+                    }
                 });
         }
     }

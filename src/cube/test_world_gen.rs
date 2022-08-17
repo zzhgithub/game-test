@@ -42,9 +42,9 @@ impl TestGetter {
             for y in -100..100 {
                 for z in -100..100 {
                     let p = Point3D::new(x, y, z);
-                    if y >= 0 && y <= 3 {
+                    if y >= -1 && y <= 0 {
                         res.data.insert(p, grass.clone());
-                    } else if y >= -8 && y < 0 {
+                    } else if y >= -8 && y < -1 {
                         res.data.insert(p, soil.clone());
                     } else if y >= -100 && y < 8 {
                         res.data.insert(p, stone.clone());
