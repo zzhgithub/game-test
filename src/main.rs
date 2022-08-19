@@ -8,6 +8,9 @@ use bevy_rapier3d::{prelude::*, rapier::crossbeam::epoch::Pointable};
 use bevy_flycam::{FlyCam, PlayerPlugin};
 use mycraft::cube::prelude::*;
 
+const load_size: f32 = 30.0;
+const check_size: f32 = 15.0;
+
 fn main() {
     App::new()
         .insert_resource(TextureMap {
@@ -184,8 +187,7 @@ fn dynamic_load_system(
         let may_z = at.z.round();
         // 数据每一帧都在加载 是不行的
         // 必选它走到边缘的时候才加载！！！
-        let load_size: f32 = 15.0;
-        let check_size: f32 = 5.0;
+
         // todo 八个方向 中 如果发现 5格子内没有了才进行加载
         // fixme 先处理 要不加载的数据 可以先进行清除? 全部清除掉 其中有的 CloseTo 组件？
         if !data.contains_key(&Point3D::new(may_x as i32, may_y as i32, may_z as i32))
@@ -227,7 +229,7 @@ fn dynamic_load_system(
                 let sum = (may_x - point3d.x as f32).powi(2)
                     + (may_y - point3d.y as f32).powi(2)
                     + (may_z - point3d.z as f32).powi(2);
-                if sum.sqrt() > ((15.0 as f32).powi(2) * 2.0 as f32).sqrt() {
+                if sum.sqrt() > ((load_size as f32).powi(2) * 2.0 as f32).sqrt() {
                     to_remove.push(point3d.to_owned());
                     commands.entity(entity.to_owned()).despawn_recursive();
                 }
