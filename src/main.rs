@@ -55,18 +55,10 @@ fn dynamic_render_system(
     let mut m_map = &mut materials_map.as_mut().data;
 
     const CUBLE_SIZE: f32 = 1.0;
-    let texture_handle: Handle<Image> = asset_server.load("pixil-frame-0.png");
     // 声明一个 2D 的贴图
     let quad_handle = meshes.add(Mesh::from(shape::Quad::new(Vec2::new(
         CUBLE_SIZE, CUBLE_SIZE,
     ))));
-    // 使用图片生成一种文理
-    let material_handle = materials.add(StandardMaterial {
-        base_color_texture: Some(texture_handle.clone()),
-        alpha_mode: AlphaMode::Blend,
-        unlit: true,
-        ..default()
-    });
 
     // 查询新增的 组件
     for (ele, transform, cube_data) in query.iter() {
