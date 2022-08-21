@@ -84,18 +84,22 @@ pub trait MapGetter {
     /**
      * 通过一个点 查询 方块的信息
      */
-    fn find(&self, p: Point3D) -> Option<CubeData>;
+    fn find(&mut self, p: Point3D) -> Option<CubeData>;
 
     /**
      * 查询一组点 数据
      */
-    fn find_list(&self, p_list: Vec<Point3D>) -> HashMap<Point3D, CubeData>;
+    fn find_list(&mut self, p_list: Vec<Point3D>) -> HashMap<Point3D, CubeData>;
 }
 
 /**
  * 判断一个面是否要被加载
  */
-pub fn need_to_render<T: MapGetter>(map_getter: &T, point3d: Point3D, face_type: FaceType) -> bool {
+pub fn need_to_render<T: MapGetter>(
+    map_getter: &mut T,
+    point3d: Point3D,
+    face_type: FaceType,
+) -> bool {
     let check_point: Point3D;
     match face_type {
         FaceType::Up => check_point = Point3D::new(point3d.x, point3d.y + 1, point3d.z),

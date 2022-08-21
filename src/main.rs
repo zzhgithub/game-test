@@ -17,7 +17,7 @@ fn main() {
             data: HashMap::new(),
         })
         // 这个资源只是mapData的缓存
-        .insert_resource(TestGetter::gen())
+        .insert_resource(CacheWorldGen::new(1234))
         .insert_resource(MapData {
             data: HashMap::new(),
         })
@@ -47,7 +47,7 @@ fn dynamic_render_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands,
-    mut test_getter: ResMut<TestGetter>,
+    mut test_getter: ResMut<CacheWorldGen>,
     mut materials_map: ResMut<TextureMap>,
     query: Query<(Entity, &Transform, &CubeData), Added<CubeData>>,
 ) {
@@ -165,7 +165,7 @@ fn dynamic_load_system(
     mut mapdata: ResMut<MapData>,
     mut commands: Commands,
     mut query: Query<&mut Transform, With<FlyCam>>,
-    mut test_getter: ResMut<TestGetter>,
+    mut test_getter: ResMut<CacheWorldGen>,
 ) {
     let test_map = test_getter.as_mut();
     // 查询到主相机的 变化
