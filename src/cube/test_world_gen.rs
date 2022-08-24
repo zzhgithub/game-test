@@ -1,5 +1,4 @@
 use bevy::utils::HashMap;
-use simdnoise::NoiseBuilder;
 
 use super::{
     cube::MapGetter,
@@ -39,22 +38,22 @@ impl TestGetter {
 
         let SIZE_TUNCK = 100;
 
-        let noise = NoiseBuilder::ridge_2d_offset(0.0, SIZE_TUNCK, 0.0, SIZE_TUNCK)
-            .with_seed(19092)
-            .with_freq(1.0 / 256.0)
-            .with_octaves(5)
-            .generate_scaled(30.0, 60.0);
+        // let noise = NoiseBuilder::ridge_2d_offset(0.0, SIZE_TUNCK, 0.0, SIZE_TUNCK)
+        //     .with_seed(19092)
+        //     .with_freq(1.0 / 256.0)
+        //     .with_octaves(5)
+        //     .generate_scaled(30.0, 60.0);
 
         // 通过噪声 生成 地形
         for x in 0..SIZE_TUNCK {
             for z in 0..SIZE_TUNCK {
-                let h = noise[x * SIZE_TUNCK + z];
+                // let h = noise[x * SIZE_TUNCK + z];
                 // let check_h = (h - 4.5) * 1024.0 + 128.0;
                 // print!("检查的高度[{:?}] ", h);
                 // print!("检查的高度[{:?}]", check_h);
                 for y in 0..=256 {
                     let p = Point3D::new(x as i32, y as i32, z as i32);
-                    if (y as f32) < h {
+                    if (y as f32) < 1.0 {
                         res.data.insert(p, grass.clone());
                     }
                 }

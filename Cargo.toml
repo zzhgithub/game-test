@@ -9,7 +9,8 @@ edition = "2021"
 bevy_rapier3d = "0.16.0"
 bevy_editor_pls = { git = "https://github.com/MitchellMarinoDev/bevy_editor_pls.git" }
 bevy_flycam = { git = "https://github.com/sburris0/bevy_flycam" }
-simdnoise = "3.1.6"
+# simdnoise = "3.1.6"
+noise = "0.7.0"
 
 
 [dependencies.bevy]

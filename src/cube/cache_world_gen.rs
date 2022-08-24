@@ -1,5 +1,8 @@
 use bevy::utils::HashMap;
-use simdnoise::NoiseBuilder;
+use noise::{
+    utils::{NoiseMapBuilder, PlaneMapBuilder},
+    Fbm, MultiFractal, Seedable,
+};
 
 use super::prelude::{BasicCubeId, CubeData, MapGetter, Point3D, BASIC_ID};
 
@@ -69,33 +72,39 @@ impl CacheWorldGen {
             ..Default::default()
         };
 
-        let (noise, min, max) 
-        = NoiseBuilder::ridge_2d_offset(x_i as f32, 30, z_i as f32, 30)
-            .with_seed(self.seed)
-            .with_freq(1.0 / 256.0)
-            .with_octaves(5)
-            .generate();
+        let fbm = Fbm::default()
+            .set_seed(self.seed as u32)
+            .set_frequency(0.01)
+            .set_persistence(0.03)
+            .set_octaves(30);
+
+        let noise = PlaneMapBuilder::new(&fbm)
+            .set_size(30, 30)
+            .set_x_bounds(x_i as f64, (x_i + 30) as f64)
+            .set_y_bounds(z_i as f64, (z_i + 30) as f64)
+            .build();
+
         // todo 这里的判断缓存的大小 不够了 清除缓存
         for x in x_i..x_i + 30 {
             for z in z_i..z_i + 30 {
                 // print!("{:?}", (x * 30 + z));
                 // 噪声加载区块时 平滑！！！
-                let mut h = noise[((x - x_i) * 30 + z - z_i) as usize];
+                let mut h = noise.get_value((x - x_i) as usize, (z - z_i) as usize);
                 // print!("5-h={:?}", 5.0 - h);
                 // print!("(5-h)*256={:?}", (5.0 - h) * 256.0 +60.0);
-                h = (h - 4.5) * 1024.0;
+                h = h * 128.0 + 128.0;
                 // + 128.0;
-                print!("H is {:?}", h);
+                // print!("H is {:?}", h);
                 for y in 0..=512 {
                     let pp = Point3D::new(x, y, z);
-                    if y as f32 > h {
+                    if y as f64 > h {
                         self.cache.insert(pp, vess.clone());
                     } else if y > 100 {
-                        self.cache.insert(pp, stone.clone());
-                    } else if y > 80 {
                         self.cache.insert(pp, grass.clone());
-                    } else if y > 60 {
+                    } else if y > 80 {
                         self.cache.insert(pp, soil.clone());
+                    } else if y > 60 {
+                        self.cache.insert(pp, stone.clone());
                     } else if y >= 0 {
                         self.cache.insert(pp, stone.clone());
                     } else {
