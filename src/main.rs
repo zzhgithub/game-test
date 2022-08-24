@@ -8,13 +8,16 @@ use bevy_rapier3d::{prelude::*, rapier::crossbeam::epoch::Pointable};
 use bevy_flycam::{FlyCam, PlayerPlugin};
 use mycraft::cube::prelude::*;
 
+const load_size: f32 = 30.0;
+const check_size: f32 = 15.0;
+
 fn main() {
     App::new()
         .insert_resource(TextureMap {
             data: HashMap::new(),
         })
         // 这个资源只是mapData的缓存
-        .insert_resource(TestGetter::gen())
+        .insert_resource(CacheWorldGen::new(1234))
         .insert_resource(MapData {
             data: HashMap::new(),
         })
@@ -44,7 +47,7 @@ fn dynamic_render_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands,
-    mut test_getter: ResMut<TestGetter>,
+    mut test_getter: ResMut<CacheWorldGen>,
     mut materials_map: ResMut<TextureMap>,
     query: Query<(Entity, &Transform, &CubeData), Added<CubeData>>,
 ) {
@@ -52,18 +55,10 @@ fn dynamic_render_system(
     let mut m_map = &mut materials_map.as_mut().data;
 
     const CUBLE_SIZE: f32 = 1.0;
-    let texture_handle: Handle<Image> = asset_server.load("pixil-frame-0.png");
     // 声明一个 2D 的贴图
     let quad_handle = meshes.add(Mesh::from(shape::Quad::new(Vec2::new(
         CUBLE_SIZE, CUBLE_SIZE,
     ))));
-    // 使用图片生成一种文理
-    let material_handle = materials.add(StandardMaterial {
-        base_color_texture: Some(texture_handle.clone()),
-        alpha_mode: AlphaMode::Blend,
-        unlit: true,
-        ..default()
-    });
 
     // 查询新增的 组件
     for (ele, transform, cube_data) in query.iter() {
@@ -170,7 +165,7 @@ fn dynamic_load_system(
     mut mapdata: ResMut<MapData>,
     mut commands: Commands,
     mut query: Query<&mut Transform, With<FlyCam>>,
-    mut test_getter: ResMut<TestGetter>,
+    mut test_getter: ResMut<CacheWorldGen>,
 ) {
     let test_map = test_getter.as_mut();
     // 查询到主相机的 变化
@@ -184,8 +179,7 @@ fn dynamic_load_system(
         let may_z = at.z.round();
         // 数据每一帧都在加载 是不行的
         // 必选它走到边缘的时候才加载！！！
-        let load_size: f32 = 15.0;
-        let check_size: f32 = 5.0;
+
         // todo 八个方向 中 如果发现 5格子内没有了才进行加载
         // fixme 先处理 要不加载的数据 可以先进行清除? 全部清除掉 其中有的 CloseTo 组件？
         if !data.contains_key(&Point3D::new(may_x as i32, may_y as i32, may_z as i32))
@@ -227,7 +221,7 @@ fn dynamic_load_system(
                 let sum = (may_x - point3d.x as f32).powi(2)
                     + (may_y - point3d.y as f32).powi(2)
                     + (may_z - point3d.z as f32).powi(2);
-                if sum.sqrt() > ((15.0 as f32).powi(2) * 2.0 as f32).sqrt() {
+                if sum.sqrt() > ((load_size as f32).powi(2) * 2.0 as f32).sqrt() {
                     to_remove.push(point3d.to_owned());
                     commands.entity(entity.to_owned()).despawn_recursive();
                 }

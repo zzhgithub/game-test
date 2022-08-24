@@ -36,23 +36,29 @@ impl TestGetter {
             ..Default::default()
         };
 
-        // 随便测试一个初始化 没有任何特别的算法
-        // 按照原来的算法 超出边界 会造成崩溃
-        for x in -100..100 {
-            for y in -100..100 {
-                for z in -100..100 {
-                    let p = Point3D::new(x, y, z);
-                    if y >= -1 && y <= 0 {
+        let SIZE_TUNCK = 100;
+
+        // let noise = NoiseBuilder::ridge_2d_offset(0.0, SIZE_TUNCK, 0.0, SIZE_TUNCK)
+        //     .with_seed(19092)
+        //     .with_freq(1.0 / 256.0)
+        //     .with_octaves(5)
+        //     .generate_scaled(30.0, 60.0);
+
+        // 通过噪声 生成 地形
+        for x in 0..SIZE_TUNCK {
+            for z in 0..SIZE_TUNCK {
+                // let h = noise[x * SIZE_TUNCK + z];
+                // let check_h = (h - 4.5) * 1024.0 + 128.0;
+                // print!("检查的高度[{:?}] ", h);
+                // print!("检查的高度[{:?}]", check_h);
+                for y in 0..=256 {
+                    let p = Point3D::new(x as i32, y as i32, z as i32);
+                    if (y as f32) < 1.0 {
                         res.data.insert(p, grass.clone());
-                    } else if y >= -8 && y < -1 {
-                        res.data.insert(p, soil.clone());
-                    } else if y >= -100 && y < -8 {
-                        res.data.insert(p, stone.clone());
-                    } else {
-                        res.data.insert(p, vess.clone());
                     }
                 }
             }
+            // println!("")
         }
 
         res
@@ -60,7 +66,7 @@ impl TestGetter {
 }
 
 impl MapGetter for TestGetter {
-    fn find(&self, p: Point3D) -> Option<CubeData> {
+    fn find(&mut self, p: Point3D) -> Option<CubeData> {
         let tmp = CubeData {
             mod_id: BASIC_ID,
             cube_id: BasicCubeId::EmptyId as i32,
@@ -72,7 +78,7 @@ impl MapGetter for TestGetter {
         }
     }
 
-    fn find_list(&self, p_list: Vec<Point3D>) -> std::collections::HashMap<Point3D, CubeData> {
+    fn find_list(&mut self, p_list: Vec<Point3D>) -> std::collections::HashMap<Point3D, CubeData> {
         todo!()
     }
 }

@@ -7,11 +7,12 @@ edition = "2021"
 
 [dependencies]
 bevy_rapier3d = "0.16.0"
-bevy_editor_pls={git = "https://github.com/MitchellMarinoDev/bevy_editor_pls.git"}
+bevy_editor_pls = { git = "https://github.com/MitchellMarinoDev/bevy_editor_pls.git" }
 bevy_flycam = { git = "https://github.com/sburris0/bevy_flycam" }
-rand = "0.8.5"
+# simdnoise = "3.1.6"
+noise = "0.7.0"
 
 
 [dependencies.bevy]
-version="0.8.0"
+version = "0.8.0"
 features = ["jpeg", "tga", "bmp", "dds", "flac", "mp3", "wav"]
